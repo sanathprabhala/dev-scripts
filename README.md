@@ -181,41 +181,35 @@ This approach uses xinetd instead of iptables to allow IPv4 to IPv6 forwarding.
     sudo yum install xinetd -y
     ```
 
-2. Create the xinetd config file
+2. Copy the example config file
 
     ```
-    mkdir -p /etc/xinetd.d/
+    sudo cp dev-scripts/openshift_xinetd_example.conf /etc/xinetd.d/openshift
     ```
 
-3. Copy the example config file
+3. Edit the config file
+
+    - The values can be found at `dev-scripts/ocp/.openshift_install_state.json`
 
     ```
-    cp dev-scripts/openshift_xinetd_example.conf /etc/xinetd.d/openshift
+    sudo vim /etc/xinetd.d/openshift
     ```
 
-4. Edit the config file
-
-    ##### Set `bind` to the public address of the lab machine
-
-    ##### Set the `redirect` IPs to dev-scripts values for apiVIP and ingressVIP, which can be found at `dev-scripts/ocp/.openshift_install_state.json`.
-
-    ```
-    vim /etc/xinetd.d/openshift
-    ```
-
-5. Restart xinetd
+4. Restart xinetd
    
     ```
     sudo systemctl restart xinetd
     ```
 
-6. Populate your local machine's `/etc/hosts/` with addresses as described in the playbook output
+5. Populate your local machine's `/etc/hosts/`
+
+    - Replace `<HOST_IP>` with your host machine's address
 
     ```
-    <hostIP> console-openshift-console.apps.<CLUSTER_NAME>.test.metalkube.org openshift-authentication-openshift-authentication.apps.<CLUSTER_NAME>.test.metalkube.org grafana-openshift-monitoring.apps.<CLUSTER_NAME>.test.metalkube.org prometheus-k8s-openshift-monitoring.apps.<CLUSTER_NAME>.test.metalkube.org api.<CLUSTER_NAME>.test.metalkube.org oauth-openshift.apps.<CLUSTER_NAME>.test.metalkube.org
+    <HOST_IP> console-openshift-console.apps.ostest.test.metalkube.org openshift-authentication-openshift-authentication.apps.ostest.test.metalkube.org grafana-openshift-monitoring.apps.ostest.test.metalkube.org prometheus-k8s-openshift-monitoring.apps.ostest.test.metalkube.org api.ostest.test.metalkube.org oauth-openshift.apps.ostest.test.metalkube.org
     ```
 
-7.  Ensure that ports 443 and 6443 ports on the host are open
+6.  Ensure that ports 443 and 6443 ports on the host are open
 
     ```
     sudo firewall-cmd --zone=public --permanent --add-service=https
