@@ -60,14 +60,19 @@ else
     [ $? -eq 0 ] && echo "Created $host_username user" || echo "Failed to add a user!" && exit 1
 fi
 
+# Change working dir to home dir
+cd home_dir
+
 # Passwordless sudo
 echo "${bold}Enabling passwordless sudo for $host_username${normal}"
 echo "$host_username ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
 
-# Subscription manager
-echo "${bold}Registering and activating subscription${normal}"
-sudo subscription-manager register --username $subs_username --password $subs_password
-sudo subscription-manager attach
+# Subscription manager (in case of RHEL)
+if [ -f "cat /etc/redhat-release" ]; then
+    echo "${bold}Registering and activating subscription${normal}"
+    sudo subscription-manager register --username $subs_username --password $subs_password
+    sudo subscription-manager attach
+fi
 
 # Packages
 echo "${bold}Updating existing and installing new packages${normal}"
