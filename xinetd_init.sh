@@ -25,4 +25,8 @@ sudo firewall-cmd --zone=public --permanent --add-service=https
 sudo firewall-cmd --permanent --add-port=6443/tcp
 sudo firewall-cmd --reload
 # Hosts file values
-'<HOST_IP> console-openshift-console.apps.ostest.test.metalkube.org openshift-authentication-openshift-authentication.apps.ostest.test.metalkube.org grafana-openshift-monitoring.apps.ostest.test.metalkube.org prometheus-k8s-openshift-monitoring.apps.ostest.test.metalkube.org api.ostest.test.metalkube.org oauth-openshift.apps.ostest.test.metalkube.org'
+ip_address=$(ifconfig eno2 | grep inet | sed 's/^ *//g; 1!d' | cut -d " " -f 2)
+if [ -z "$ip_address" ]; then
+    $ip_address="<HOST_IP>"
+fi
+echo "${ip_address} console-openshift-console.apps.ostest.test.metalkube.org openshift-authentication-openshift-authentication.apps.ostest.test.metalkube.org grafana-openshift-monitoring.apps.ostest.test.metalkube.org prometheus-k8s-openshift-monitoring.apps.ostest.test.metalkube.org api.ostest.test.metalkube.org oauth-openshift.apps.ostest.test.metalkube.org"
