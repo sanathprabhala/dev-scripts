@@ -6,7 +6,7 @@
 # 3. Edit the config file
 # 4. Restart xinetd
 # 5. Open ports 443 and 6443
-# 6. Display values for the local machine's /etc/hosts/
+# 6. Display values for the local machine's /etc/hosts
 
 # Install
 sudo yum install xinetd -y
@@ -29,4 +29,5 @@ ip_address=$(ifconfig eno2 | grep inet | sed 's/^ *//g; 1!d' | cut -d " " -f 2)
 if [ -z "$ip_address" ]; then
     $ip_address="<HOST_IP>"
 fi
+echo "Populate your local machine's /etc/hosts file with:"
 echo "${ip_address} console-openshift-console.apps.ostest.test.metalkube.org openshift-authentication-openshift-authentication.apps.ostest.test.metalkube.org grafana-openshift-monitoring.apps.ostest.test.metalkube.org prometheus-k8s-openshift-monitoring.apps.ostest.test.metalkube.org api.ostest.test.metalkube.org oauth-openshift.apps.ostest.test.metalkube.org"

@@ -61,14 +61,16 @@ else
 fi
 
 # Change working dir to home dir
-cd home_dir
+cd $home_dir
 
-# Passwordless sudo
-echo "${bold}Enabling passwordless sudo for $host_username${normal}"
-echo "$host_username ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
+# Passwordless sudo (if not set up yet)
+if ! grep -Fxq "${host_username}\s*ALL=(ALL)\s*NOPASSWD:\s*ALL" /etc/sudoers; then
+    echo "${bold}Enabling passwordless sudo for $host_username${normal}"
+    echo "${host_username}\tALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
+fi
 
 # Subscription manager (in case of RHEL)
-if [ -f "cat /etc/redhat-release" ]; then
+if [ -f "/etc/redhat-release" ] && grep -q "Red Hat Enterprise Linux" /etc/redhat-release; then
     echo "${bold}Registering and activating subscription${normal}"
     sudo subscription-manager register --username $subs_username --password $subs_password
     sudo subscription-manager attach
@@ -77,10 +79,11 @@ fi
 # Packages
 echo "${bold}Updating existing and installing new packages${normal}"
 sudo yum update -y
-install_cmd="sudo yum install -y git make wget jq"
-[ -n "$shell" ] && install_cmd="${install_cmd}$shell"             # Concatenate the shell variable if it isn't empty
-[ -n "$text_editor" ] && install_cmd="${install_cmd}$text_editor" # Same as above
-eval install_cmd
+echo "${bold}Updating existing and installing new packages${normal}"
+install_cmd="sudo yum install -y git make wget jq "
+[ -n "$shell" ] && $install_cmd="${install_cmd}$shell"             # Concatenate the shell variable if it isn't empty
+[ -n "$text_editor" ] && $install_cmd="${install_cmd}$text_editor" # Same as above
+eval $install_cmd
 
 # Dev-Scripts
 echo "${bold}Cloning dev-scripts repository${normal}"
@@ -93,12 +96,15 @@ echo "${bold}Configuring the pull secret${normal}"
 shared_secret='{"registry.svc.ci.openshift.org": {
     "auth": "PLACE_SECRET_HERE"
 }}'
-cat pull-secret | jq --argjson secret $shared_secret '.["auths"] + "$secret"' >$home_dir/pull-secret
+cat pull-secret | jq --argjson secret $shared_secret '.["auths"] + $secret' >$home_dir/pull-secret
 sed -i "s/PULL_SECRET=''/PULL_SECRET='cat ${home_dir}/pull-secret'/g" config_$host_username.sh
 
 # Workdir
-mkdir /home/dev-scripts
-chmod 755 /home/dev-scripts
+echo "${bold}Creating workdir${normal}"
+sudo mkdir /home/dev-scripts
+sudo chmod 755 /home/dev-scripts
 
 # Run `make`
+echo "${bold}Running dev-scripts install${normal}"
+export CONFIG=config_$host_username.sh
 make -C dev-scripts
