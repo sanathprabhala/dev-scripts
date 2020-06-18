@@ -57,7 +57,7 @@ if [ $? -eq 0 ]; then
     echo "$host_username already exists"
 else
     useradd -m -p "$host_password" "$host_username"
-    [ $? -eq 0 ] && echo "Created $host_username user" || echo "Failed to add a user!" && exit 1
+    [ $? -eq 0 ] && echo "Created $host_username user" || echo "${bold}${warning}Failed to add a user!${normal}" && exit 1
 fi
 
 # Change working dir to home dir
@@ -72,18 +72,19 @@ fi
 # Subscription manager (in case of RHEL)
 if [ -f "/etc/redhat-release" ] && grep -q "Red Hat Enterprise Linux" /etc/redhat-release; then
     echo "${bold}Registering and activating subscription${normal}"
-    sudo subscription-manager register --username $subs_username --password $subs_password
-    sudo subscription-manager attach
+    subscription-manager register --username $subs_username --password $subs_password
+    subscription-manager attach
 fi
 
 # Packages
-echo "${bold}Updating existing and installing new packages${normal}"
-sudo yum update -y
-echo "${bold}Updating existing and installing new packages${normal}"
+echo "${bold}Updating existing packages${normal}"
+yum update -y
+echo "${bold}Installing new packages${normal}"
 install_cmd="sudo yum install -y git make wget jq "
 [ -n "$shell" ] && $install_cmd="${install_cmd}$shell"             # Concatenate the shell variable if it isn't empty
 [ -n "$text_editor" ] && $install_cmd="${install_cmd}$text_editor" # Same as above
 eval $install_cmd
+[ $? -eq 0 ] || echo "${bold}${warning}Failed:${normal} ${install_cmd}" && exit 1
 
 # Dev-Scripts
 echo "${bold}Cloning dev-scripts repository${normal}"
@@ -100,11 +101,11 @@ cat pull-secret | jq --argjson secret $shared_secret '.["auths"] + $secret' >$ho
 sed -i "s/PULL_SECRET=''/PULL_SECRET='cat ${home_dir}/pull-secret'/g" config_$host_username.sh
 
 # Workdir
-echo "${bold}Creating workdir${normal}"
-sudo mkdir /home/dev-scripts
-sudo chmod 755 /home/dev-scripts
+echo "${bold}Creating workdir${normal} at /home/dev-scripts"
+mkdir /home/dev-scripts
+chmod 755 /home/dev-scripts
 
 # Run `make`
 echo "${bold}Running dev-scripts install${normal}"
 export CONFIG=config_$host_username.sh
-make -C dev-scripts
+su - $host_username -c 'make -C dev-scripts'
