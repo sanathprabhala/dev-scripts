@@ -80,7 +80,7 @@ fi
 echo "${bold}Updating existing packages${normal}"
 yum update -y
 echo "${bold}Installing new packages${normal}"
-install_cmd="sudo yum install -y git make wget jq "
+install_cmd="sudo yum install -y git make wget tmux jq "
 [ -n "$shell" ] && $install_cmd="${install_cmd}$shell"             # Concatenate the shell variable if it isn't empty
 [ -n "$text_editor" ] && $install_cmd="${install_cmd}$text_editor" # Same as above
 eval $install_cmd
