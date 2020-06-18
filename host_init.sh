@@ -64,7 +64,7 @@ fi
 cd $home_dir
 
 # Passwordless sudo (if not set up yet)
-if ! grep -Fxq "${host_username}\s*ALL=(ALL)\s*NOPASSWD:\s*ALL" /etc/sudoers; then
+if ! grep -xq "${host_username}\s*ALL=(ALL)\s*NOPASSWD:\s*ALL" /etc/sudoers; then
     echo "${bold}Enabling passwordless sudo for $host_username${normal}"
     echo "${host_username}\tALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
 fi
