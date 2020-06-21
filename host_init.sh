@@ -66,7 +66,7 @@ cd $home_dir
 # Passwordless sudo (if not set up yet)
 if ! grep -xq "${host_username}\s*ALL=(ALL)\s*NOPASSWD:\s*ALL" /etc/sudoers; then
     echo "${bold}Enabling passwordless sudo for $host_username${normal}"
-    echo "${host_username}\tALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
+    echo "${host_username}  ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
 fi
 
 # Subscription manager (in case of RHEL)
@@ -80,11 +80,11 @@ fi
 echo "${bold}Updating existing packages${normal}"
 yum update -y
 echo "${bold}Installing new packages${normal}"
-install_cmd="sudo yum install -y git make wget tmux jq "
-[ -n "$shell" ] && $install_cmd="${install_cmd}$shell"             # Concatenate the shell variable if it isn't empty
-[ -n "$text_editor" ] && $install_cmd="${install_cmd}$text_editor" # Same as above
+install_cmd="yum install -y git make wget tmux jq"
+[ -n "$shell" ] && install_cmd+=" $shell"             # Concatenate the shell variable if it isn't empty
+[ -n "$text_editor" ] && install_cmd+=" $text_editor" # Same as above
 eval $install_cmd
-[ $? -eq 0 ] || echo "${bold}${warning}Failed:${normal} ${install_cmd}" && exit 1
+[ $? -eq 0 ] || (echo "${bold}${warning}Failed:${normal} ${install_cmd}" && exit 1)
 
 # Dev-Scripts
 echo "${bold}Cloning dev-scripts repository${normal}"
